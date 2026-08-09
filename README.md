@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Trash Detector — Web Deployment
 
 A Flask web app that serves your YOLOv8 trash-detection model (Cardboard,
@@ -107,3 +108,6 @@ link, Hugging Face Hub, etc.) instead of committing the binary.
 ```
 
 `GET /health` — `{"status": "ok"}` (200) or `{"status": "model_not_loaded", "error": "..."}` (503).
+=======
+# Yolov8-Model
+>>>>>>> c0ec002a5e7714b48f03934697cddd25f1a6b712
