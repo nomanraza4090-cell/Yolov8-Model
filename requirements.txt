@@ -1,0 +1,17 @@
+# Web framework
+flask==3.1.3
+werkzeug==3.1.7
+gunicorn==23.0.0
+
+# Model inference (YOLOv8)
+ultralytics==8.4.116
+torch==2.13.0
+torchvision==0.28.0
+
+# Image handling
+pillow==12.1.1
+numpy==2.4.4
+
+# opencv-python-headless (not opencv-python) — avoids GUI/libGL errors
+# on headless servers such as Render, Railway, Heroku, or Docker slim images.
+opencv-python-headless==4.13.0.92

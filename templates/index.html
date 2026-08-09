@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trash Detector — YOLOv8</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>♻️ Trash Detector</h1>
+    <p class="subtitle">Upload a photo to detect Cardboard, Metal, or Plastic.</p>
+
+    {% if not model_ready %}
+    <div class="banner banner-error">
+      ⚠️ Model failed to load: {{ model_error }}<br>
+      Add your trained <code>best.pt</code> to the <code>model/</code> folder and restart the server.
+    </div>
+    {% endif %}
+
+    <form id="upload-form">
+      <input type="file" id="file-input" name="file" accept="image/*" required {{ 'disabled' if not model_ready }}>
+      <button type="submit" id="submit-btn" {{ 'disabled' if not model_ready }}>Detect</button>
+    </form>
+
+    <div id="status"></div>
+
+    <div id="result" class="result hidden">
+      <img id="result-image" alt="Detection result">
+      <div id="detections"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('upload-form');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+    const resultImg = document.getElementById('result-image');
+    const detectionsEl = document.getElementById('detections');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('file-input');
+      if (!fileInput.files.length) return;
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      statusEl.textContent = 'Analyzing...';
+      resultEl.classList.add('hidden');
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch('/predict', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (!res.ok) {
+          statusEl.textContent = 'Error: ' + (data.error || 'Unknown error');
+          return;
+        }
+
+        statusEl.textContent = `Found ${data.count} object(s).`;
+        resultImg.src = data.annotated_image_url;
+        detectionsEl.innerHTML = data.detections.map(d =>
+          `<div class="detection-row"><span class="cls">${d.class}</span><span class="conf">${(d.confidence * 100).toFixed(1)}%</span></div>`
+        ).join('') || '<p>No objects detected above the confidence threshold.</p>';
+
+        resultEl.classList.remove('hidden');
+      } catch (err) {
+        statusEl.textContent = 'Network error: ' + err.message;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
